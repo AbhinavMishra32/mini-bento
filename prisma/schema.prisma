@@ -105,6 +105,7 @@ model TraceSpan {
 }
 
 model FailureCluster {
+  // can also use vector db to put all similar failures together
   id             String       @id @default(cuid())
   title          String
   failureClass   FailureClass
@@ -123,20 +124,18 @@ model FailureCluster {
 }
 
 model LearningArtifact {
-  id                     String          @id @default(cuid())
+  id                     String         @id @default(cuid())
   trigger                String
   instruction            String
-  confidence             Float           @default(0)
-  measuredList           Float           @default(0)
-  uses                   Int             @default(0)
-  successes              Int             @default(0)
-  failures               Int             @default(0)
-  status                 ArtifactStatus  @default(candidate)
+  confidence             Float          @default(0)
+  measuredLift           Float          @default(0)
+  uses                   Int            @default(0)
+  successes              Int            @default(0)
+  failures               Int            @default(0)
+  status                 ArtifactStatus @default(candidate)
   sourceFailureClusterId String?
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
-  failureCluster         FailureCluster? @relation(fields: [failureClusterId], references: [id])
-  failureClusterId       String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 
   sourceFailureCluster FailureCluster? @relation(fields: [sourceFailureClusterId], references: [id], onDelete: SetNull)
 
