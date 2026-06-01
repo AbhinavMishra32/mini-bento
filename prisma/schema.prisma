@@ -11,3 +11,40 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+enum RunStatus {
+  running
+  success
+  failed
+  partial
+}
+
+enum SpanType {
+  model_call
+  tool_call
+  decision
+  evaluator
+  system
+}
+
+enum SpanStatus {
+  success
+  failed
+}
+
+enum FailureClass {
+  auth_failure
+  schema_failure
+  prompt_drift
+  retry_loop
+  early_success
+  bad_tool_choice
+  missing_information
+  unknown
+}
+
+enum Severity {
+  low
+  medium
+  high
+}
