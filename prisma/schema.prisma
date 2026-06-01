@@ -48,3 +48,169 @@ enum Severity {
   medium
   high
 }
+
+enum ArtifactStatus {
+  candidate
+  validated
+  demoted
+}
+
+enum ReplayTaskType {
+  inbox
+  crm
+  calendar
+}
+
+model AgentRun {
+  id             String         @id @default(cuid())
+  userGoal       String
+  taskType       ReplayTaskType
+  model          String
+  promptVersion  String
+  status         RunStatus      @default(running)
+  costCents      Int            @default(0)
+  latencyMs      Int            @default(0)
+  finalAnswer    String?
+  failureSummary String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  spans TraceSpan[]
+
+  @@index([status])
+  @@index([taskType])
+  @@index([promptVersion])
+  @@index([createdAt])
+}
+
+model TraceSpan {
+  id           String     @id @default(cuid())
+  runId        String
+  type         SpanType
+  name         String
+  toolName     String?
+  inputJson    Json
+  outputJson   Json?
+  status       SpanStatus
+  latencyMs    Int        @default(0)
+  errorMessage String?
+  createdAt    DateTime   @default(now())
+
+  run AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+  @@index([type])
+  @@index([status])
+  @@index([toolName])
+}
+
+model FailureCluster {
+  id             String       @id @default(cuid())
+  title          String
+  failureClass   FailureClass
+  trigger        String
+  evidence       String
+  severity       Severity
+  affectedRunIds String
+  suggestedFix   String
+  createdAt      DateTime     @default(now())
+
+  learningArtifacts LearningArtifact[] // bento!
+
+  @@index([failureClass])
+  @@index([severity])
+  @@index([createdAt])
+}
+
+model LearningArtifact {
+  id                     String          @id @default(cuid())
+  trigger                String
+  instruction            String
+  confidence             Float           @default(0)
+  measuredList           Float           @default(0)
+  uses                   Int             @default(0)
+  successes              Int             @default(0)
+  failures               Int             @default(0)
+  status                 ArtifactStatus  @default(candidate)
+  sourceFailureClusterId String?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  failureCluster         FailureCluster? @relation(fields: [failureClusterId], references: [id])
+  failureClusterId       String?
+
+  sourceFailureCluster FailureCluster? @relation(fields: [sourceFailureClusterId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([sourceFailureClusterId])
+  @@index([createdAt])
+}
+
+model ReplayEvaluation {
+  id             String   @id @default(cuid())
+  oldVersion     String
+  newVersion     String
+  testedRuns     Int
+  regressions    Int
+  improvements   Int
+  unchanged      Int
+  costDeltaCents Int
+  latencyDeltaMs Int
+  passed         Boolean
+  notes          String?
+  createdAt      DateTime @default(now())
+
+  @@index([oldVersion])
+  @@index([newVersion])
+  @@index([passed])
+  @@index([createdAt])
+}
+
+model ReplayTask {
+  id              String         @id @default(cuid())
+  type            ReplayTaskType
+  userGoal        String
+  expectedOutcome String
+  createdAt       DateTime       @default(now())
+
+  @@index([type])
+  @@index([createdAt])
+}
+
+model InboxMessage {
+  id         String   @id @default(cuid())
+  from       String
+  subject    String
+  body       String
+  receivedAt DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([receivedAt])
+  @@index([subject])
+  @@index([from])
+}
+
+model CalendarSlot {
+  id              String   @id @default(cuid())
+  team            String
+  startsAt        DateTime
+  durationMinutes Int
+  isBooked        Boolean  @default(false)
+  bookedFor       String?
+  createdAt       DateTime @default(now())
+
+  @@index([team])
+  @@index([startsAt])
+  @@index([isBooked])
+}
+
+model CrmLead {
+  id        String   @id @default(cuid())
+  name      String
+  company   String
+  source    String
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([company])
+  @@index([createdAt])
+}
