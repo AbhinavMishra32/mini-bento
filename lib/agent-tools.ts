@@ -137,3 +137,47 @@ export async function findCalendarSlots(input: FindCalendarSlotsInput) {
     bookedFor: slot.bookedFor,
   }));
 }
+
+type BookCalendarSlotInput = {
+  slotId: string;
+  bookedFor: string;
+};
+
+export async function bookCalendarSlot(input: BookCalendarSlotInput) {
+  if (!input.bookedFor.trim()) {
+    throw new Error("bookedFor is required.");
+  }
+
+  const slot = await prisma.calendarSlot.findUnique({
+    where: {
+      id: input.slotId,
+    },
+  });
+
+  if (!slot) {
+    throw new Error(`Calendar slot not found: ${input.slotId}`);
+  }
+
+  if (slot.isBooked) {
+    throw new Error(`Calendar slot is already booked: ${input.slotId}`);
+  }
+
+  const updatedSlot = await prisma.calendarSlot.update({
+    where: {
+      id: input.slotId,
+    },
+    data: {
+      isBooked: true,
+      bookedFor: input.bookedFor,
+    },
+  });
+
+  return {
+    id: updatedSlot.id,
+    team: updatedSlot.team,
+    startsAt: updatedSlot.startsAt,
+    durationMinutes: updatedSlot.durationMinutes,
+    isBooked: updatedSlot.isBooked,
+    bookedFor: updatedSlot.bookedFor,
+  };
+}
