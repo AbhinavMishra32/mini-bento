@@ -113,3 +113,13 @@ async function main() {
 
   console.log("Seeded local agent world.");
 }
+
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (error) => {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
