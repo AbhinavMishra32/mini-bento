@@ -48,7 +48,7 @@ type ReadInboxMessageInput = {
 };
 
 // searched it used to get the overview and then agent will fetch actual data through id
-export async function readInboxMessages(input: ReadInboxMessageInput) {
+export async function readInboxMessage(input: ReadInboxMessageInput) {
   const message = await prisma.inboxMessage.findUnique(({
     where: {
       id: input.id,
