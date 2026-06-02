@@ -62,18 +62,18 @@ enum ReplayTaskType {
 }
 
 model AgentRun {
-  id             String         @id @default(cuid())
+  id             String          @id @default(cuid())
   userGoal       String
-  taskType       ReplayTaskType
+  taskType       ReplayTaskType?
   model          String
   promptVersion  String
-  status         RunStatus      @default(running)
-  costCents      Int            @default(0)
-  latencyMs      Int            @default(0)
+  status         RunStatus       @default(running)
+  costCents      Int             @default(0)
+  latencyMs      Int             @default(0)
   finalAnswer    String?
   failureSummary String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
   spans TraceSpan[]
 

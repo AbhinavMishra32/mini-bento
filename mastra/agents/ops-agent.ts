@@ -30,7 +30,7 @@ Rules:
 - If required information is missing, say what is missing instead of inventing it.
 - Keep final answers short and factual.
 `,
-  model: "google/gemini-3.5-flash",
+  model: "google/gemini-3-flash-preview",
   tools: {
     searchInboxTool,
     readInboxMessageTool,
